@@ -86,3 +86,4 @@ versions:
 	  /bin/echo -n "$$s " ; \
 	  cft-get-output -s --stack-name $(STACK_PREFIX)-$(env)-$$s --output-key Version --region $(AWS_DEFAULT_REGION) ; \
 	done
+

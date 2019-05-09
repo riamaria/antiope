@@ -37,8 +37,8 @@ search-cluster/*/elasticsearch/
 # Build-time crud for the inventory lambda
 lambda_layer/python/
 gcp_lambda_layer/python/
+azure_lambda_layer/python/
 azure-lambda-layer/python/
-
 
 
 # Manifests are inputs to Cloudformation. They contain deploy specific things (like payer accounts)
