@@ -203,6 +203,87 @@ Resources:
     Properties:
       DisplayName: !Sub "Triggers the Inventory of each Subscription for ${AWS::StackName}"
 
+  PullIPDataLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-pull-ip-data"
+      Description: AWS Lamdba to pull IP data from Azure Organization into the S3
+      Handler: pull_ip_data.handler
+      Runtime: python3.6
+      Timeout: 300
+      MemorySize: !Ref pSmallLambdaSize
+      Role: !GetAtt InventoryLambdaRole.Arn
+      Code:
+        S3Bucket: !Ref pBucketName
+        S3Key: !Sub ${pLambdaZipFile}
+      Layers:
+        - !Ref AzureInventoryLambdaLayer
+      Environment:
+        Variables:
+          INVENTORY_BUCKET: !Ref pBucketName
+          AZURE_SECRET_NAME: !Ref pAzureServiceSecretName
+
+  PullVMDataLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-pull-vm-data"
+      Description: AWS Lamdba to pull vm data from Azure Organization into the S3
+      Handler: pull_vm_data.handler
+      Runtime: python3.6
+      Timeout: 300
+      MemorySize: !Ref pSmallLambdaSize
+      Role: !GetAtt InventoryLambdaRole.Arn
+      Code:
+        S3Bucket: !Ref pBucketName
+        S3Key: !Sub ${pLambdaZipFile}
+      Layers:
+        - !Ref AzureInventoryLambdaLayer
+      Environment:
+        Variables:
+          INVENTORY_BUCKET: !Ref pBucketName
+          AZURE_SECRET_NAME: !Ref pAzureServiceSecretName
+      # Tags inherited from Stack
+
+  PullStorageDataLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-pull-storage-data"
+      Description: AWS Lamdba to pull IP data from Azure Organization into the S3
+      Handler: pull_storage_data.handler
+      Runtime: python3.6
+      Timeout: 300
+      MemorySize: !Ref pSmallLambdaSize
+      Role: !GetAtt InventoryLambdaRole.Arn
+      Code:
+        S3Bucket: !Ref pBucketName
+        S3Key: !Sub ${pLambdaZipFile}
+      Layers:
+        - !Ref AzureInventoryLambdaLayer
+      Environment:
+        Variables:
+          INVENTORY_BUCKET: !Ref pBucketName
+          AZURE_SECRET_NAME: !Ref pAzureServiceSecretName
+
+  PullAppServiceDataLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-pull-app-service-data"
+      Description: AWS Lamdba to pull App Service data from Azure Organization into the S3
+      Handler: pull_app_service_data.handler
+      Runtime: python3.6
+      Timeout: 300
+      MemorySize: !Ref pSmallLambdaSize
+      Role: !GetAtt InventoryLambdaRole.Arn
+      Code:
+        S3Bucket: !Ref pBucketName
+        S3Key: !Sub ${pLambdaZipFile}
+      Layers:
+        - !Ref AzureInventoryLambdaLayer
+      Environment:
+        Variables:
+          INVENTORY_BUCKET: !Ref pBucketName
+          AZURE_SECRET_NAME: !Ref pAzureServiceSecretName
+
   PullOtherDataLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:

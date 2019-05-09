@@ -229,7 +229,7 @@ def get_logic_apps(azure_creds, subscription_id):
 
     return _generic_json_list_return(logic_app_client.list_operations())
 
-    
+      
 def _generic_json_list_return(object_list)-> list:
     """
     This function is used to convert objects into simple jsons, the sdk returns objects and we need them as jsons
