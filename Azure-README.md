@@ -40,6 +40,14 @@ aws secretsmanager create-secret --name ${STACK_PREFIX}-Azure-Credentials --regi
             --secret-string file://azure_cred.json
 ````
 
+or to Update
+```bash
+. config.PROD
+aws secretsmanager update-secret --secret-id ${STACK_PREFIX}-Azure-Credentials --region ${AWS_DEFAULT_REGION} \
+            --description "Provide Azure Inventory Credentails for Antiope" \
+            --secret-string file://azure_cred.json
+````
+
 The Arn returned by that command should be added as pAzureServiceSecretArn to the Manifest file.
 
 ## Deploy
