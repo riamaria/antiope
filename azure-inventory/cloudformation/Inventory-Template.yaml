@@ -314,23 +314,24 @@ Resources:
       SourceArn: !Ref TriggerSubscriptionInventoryFunctionTopic
       Action: lambda:invokeFunction
 
-  PullOtherDataLambdaFunctionTriggerSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      Endpoint: !GetAtt [PullOtherDataLambdaFunction, Arn]
-      Protocol: lambda
-      TopicArn: !Ref 'TriggerSubscriptionInventoryFunctionTopic'
+  ## Disable Inventory for the time being.
+  # PullOtherDataLambdaFunctionTriggerSubscription:
+  #   Type: AWS::SNS::Subscription
+  #   Properties:
+  #     Endpoint: !GetAtt [PullOtherDataLambdaFunction, Arn]
+  #     Protocol: lambda
+  #     TopicArn: !Ref 'TriggerSubscriptionInventoryFunctionTopic'
 
 
   #
   # State Machine Functions
   #
-  PullOrganizationDataLambdaFunction:
+  InventorySubscriptionsLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${AWS::StackName}-pull-organization-data"
-      Description: AWS Lamdba to pull data from Azure Organization into the Azure Inventory DDB Table
-      Handler: pull_organization_data.handler
+      FunctionName: !Sub "${AWS::StackName}-inventory_subscriptions"
+      Description: AWS Lamdba to discover all Azure Subs and add to the Azure Inventory DDB Table
+      Handler: inventory_subscriptions.handler
       Runtime: python3.6
       Timeout: 300
       MemorySize: !Ref pSmallLambdaSize
@@ -489,7 +490,7 @@ Resources:
             - lambda:InvokeFunction
             Effect: Allow
             Resource:
-              - !GetAtt PullOrganizationDataLambdaFunction.Arn
+              - !GetAtt InventorySubscriptionsLambdaFunction.Arn
               - !GetAtt TriggerSubscriptionActionsLambdaFunction.Arn
               - !GetAtt CreateSubscriptionReportLambdaFunction.Arn
               - !GetAtt InventoryErrorHandlingLambdaFunction.Arn
@@ -510,16 +511,16 @@ Resources:
       DefinitionString: !Sub |-
         {
           "Comment": "(${AWS::StackName}) State Machine to Gather Subcription Inventory Information",
-          "StartAt": "PullOrganizationDataLambdaFunction",
+          "StartAt": "InventorySubscriptionsLambdaFunction",
           "States": {
             "ErrorHandlerState": {
               "Type": "Task",
               "Resource": "${InventoryErrorHandlingLambdaFunction.Arn}" ,
               "End": true
             },
-            "PullOrganizationDataLambdaFunction": {
+            "InventorySubscriptionsLambdaFunction": {
               "Type": "Task",
-              "Resource": "${PullOrganizationDataLambdaFunction.Arn}",
+              "Resource": "${InventorySubscriptionsLambdaFunction.Arn}",
               "Next": "TriggerSubscriptionActionsLambdaFunction",
               "Catch": [{
                 "ErrorEquals": ["States.ALL"],

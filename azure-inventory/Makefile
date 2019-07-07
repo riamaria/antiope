@@ -48,7 +48,7 @@ export TEMPLATE_KEY ?= deploy-packages/$(STACK_NAME)-Template-$(version).yaml
 export TEMPLATE_URL ?= https://s3.amazonaws.com/$(BUCKET)/$(TEMPLATE_KEY)
 
 # List of all the functions deployed by this stack. Required for "make update" to work.
-FUNCTIONS = $(FULL_STACK_NAME)-pull-organization-data \
+FUNCTIONS = $(FULL_STACK_NAME)-inventory_subscriptions \
 			$(FULL_STACK_NAME)-pull-other-data \
 			$(FULL_STACK_NAME)-pull-vm-data \
 			$(FULL_STACK_NAME)-pull-ip-data \

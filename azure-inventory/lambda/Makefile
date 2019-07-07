@@ -9,7 +9,7 @@ FILES=  pull_ip_data.py \
 		pull_storage_data.py \
 		pull_app_service_data.py \
 		pull_other_data.py \
-		pull_organization_data.py \
+		inventory_subscriptions.py \
 		trigger_subscription_actions.py \
 		report-subscriptions.py \
 		new_subscription_handler.py
