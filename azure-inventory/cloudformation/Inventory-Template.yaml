@@ -127,6 +127,7 @@ Resources:
                 - sns:publish
               Resource:
                 - !Ref TriggerSubscriptionInventoryFunctionTopic
+                - !Ref NewActiveSubscriptionTopic
       - PolicyName: LambdaLogging
         PolicyDocument:
           Version: '2012-10-17'

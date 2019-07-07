@@ -9,9 +9,6 @@ import time
 import datetime
 from dateutil import tz
 
-from lib.account import *
-from lib.common import *
-
 import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
