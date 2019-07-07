@@ -42,7 +42,8 @@ def handler(event, context):
             "subscription_id": subscription.subscription_id,
             "display_name": subscription.display_name,
             "state": str(subscription.state),
-            "SubscriptionClass": json.loads(json.dumps(subscription, default=str))
+            "SubscriptionClass": json.loads(json.dumps(subscription, default=str)),
+            "tenant_id": credential_info["tenant_id"]
         }
 
         create_or_update_subscription(subscription_dict, subscription_table)
@@ -65,11 +66,12 @@ def create_or_update_subscription(subscription, subscription_table):
     try:
         response = subscription_table.update_item(
             Key= {'subscription_id': subscription["subscription_id"]},
-            UpdateExpression="set display_name=:name, subscription_state=:status, SubscriptionClass=:class_record",
+            UpdateExpression="set display_name=:name, subscription_state=:status, SubscriptionClass=:class_record, tenant_id=:tenant_id",
             ExpressionAttributeValues={
                 ':name':            subscription["display_name"],
                 ':status':          subscription["state"],
-                ':class_record':    subscription["SubscriptionClass"]
+                ':class_record':    subscription["SubscriptionClass"],
+                ':tenant_id':       subscription["tenant_id"]
             }
         )
 
