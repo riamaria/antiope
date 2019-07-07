@@ -14,7 +14,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logging.getLogger('botocore').setLevel(logging.WARNING)
 logging.getLogger('boto3').setLevel(logging.WARNING)
-
+# TODO - Figure out what stupid module Azure uses for logger so I can suppress all their damn debug messages.
 
 # Lambda main routine
 def handler(event, context):
@@ -36,8 +36,14 @@ def handler(event, context):
     collected_subs = []
     for subscription in resource_client.subscriptions.list():
 
-        subscription_dict = {"subscription_id": subscription.subscription_id,
-                                 "display_name": subscription.display_name, "state": str(subscription.state)}
+        logger.info(subscription)
+
+        subscription_dict = {
+            "subscription_id": subscription.subscription_id,
+            "display_name": subscription.display_name,
+            "state": str(subscription.state),
+            "SubscriptionClass": json.loads(json.dumps(subscription, default=str))
+        }
 
         create_or_update_subscription(subscription_dict, subscription_table)
         collected_subs.append(subscription_dict)
@@ -57,24 +63,16 @@ def create_or_update_subscription(subscription, subscription_table):
     logger.info(u"Adding subscription {}".format(subscription))
 
     try:
-        #response = subscription_table.put_item(Item=subscription)
-        # response = subscription_table.update_item(
-        #     Key={'subscription_id': subscription["subscription_id"]},
-        #     AttributeUpdates=subscription,
-        # )
-        #
-        for key in subscription.keys():
-            if key != "subscription_id":
-                response = subscription_table.update_item(
-                        Key={'subscription_id': subscription["subscription_id"]},
-                    UpdateExpression='SET #ts = :val1',
-                    ExpressionAttributeValues={
-                        ":val1": subscription[key]
-                    },
-                    ExpressionAttributeNames={
-                        "#ts": key
-                    }
-                )
+        response = subscription_table.update_item(
+            Key= {'subscription_id': subscription["subscription_id"]},
+            UpdateExpression="set display_name=:name, subscription_state=:status, SubscriptionClass=:class_record",
+            ExpressionAttributeValues={
+                ':name':            subscription["display_name"],
+                ':status':          subscription["state"],
+                ':class_record':    subscription["SubscriptionClass"]
+            }
+        )
+
     except ClientError as e:
         raise AccountUpdateError(u"Unable to create {}: {}".format(subscription, e))
     except KeyError as e:
