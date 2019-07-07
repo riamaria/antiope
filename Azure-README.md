@@ -20,9 +20,16 @@ You'll get a message saying:
 2. Create an Azure Credential file (azure_cred.json) that looks like this:
 ```json
 {
-  "application_id": "REPLACEME",
-  "key": "REPLACEME",
-  "tenant_id": "THIS_IS_YOUR_AZURE_AD_TENANT_ID"
+  "<tenant_name>": {
+    "application_id": "REPLACEME",
+    "key": "REPLACEME",
+    "tenant_id": "THIS_IS_YOUR_AZURE_AD_TENANT_ID"
+  },
+  "<second_tenant_name>": {
+    "application_id": "REPLACEME",
+    "key": "REPLACEME",
+    "tenant_id": "THIS_IS_YOUR_AZURE_AD_TENANT_ID"
+  }
 }
 ```
 2. Then add those credentials to AWS Secrets Manager which the lambas will use to authentication Azure Resource Manager

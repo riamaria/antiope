@@ -23,31 +23,30 @@ def handler(event, context):
     dynamodb = boto3.resource('dynamodb')
     subscription_table = dynamodb.Table(os.environ['SUBSCRIPTION_TABLE'])
 
-    credential_info = get_azure_creds(os.environ['AZURE_SECRET_NAME'])
-    if credential_info is None:
+    azure_secret = get_azure_creds(os.environ['AZURE_SECRET_NAME'])
+    if azure_secret is None:
         raise Exception("Unable to extract Azure Credentials. Aborting...")
 
-    # subscription_list = get_subcriptions(credential_info)
-
-    creds = return_azure_creds(credential_info["application_id"], credential_info["key"], credential_info["tenant_id"])
-
-    resource_client = SubscriptionClient(creds)
-
     collected_subs = []
-    for subscription in resource_client.subscriptions.list():
+    for tenant, credential_info in azure_secret.items():
+        creds = return_azure_creds(credential_info["application_id"], credential_info["key"], credential_info["tenant_id"])
 
-        logger.info(subscription)
+        resource_client = SubscriptionClient(creds)
+        for subscription in resource_client.subscriptions.list():
 
-        subscription_dict = {
-            "subscription_id": subscription.subscription_id,
-            "display_name": subscription.display_name,
-            "state": str(subscription.state),
-            "SubscriptionClass": json.loads(json.dumps(subscription, default=str)),
-            "tenant_id": credential_info["tenant_id"]
-        }
+            logger.info(subscription)
 
-        create_or_update_subscription(subscription_dict, subscription_table)
-        collected_subs.append(subscription_dict)
+            subscription_dict = {
+                "subscription_id": subscription.subscription_id,
+                "display_name": subscription.display_name,
+                "state": str(subscription.state),
+                "SubscriptionClass": json.loads(json.dumps(subscription, default=str)),
+                "tenant_id": credential_info["tenant_id"],
+                "tenant_name": tenant
+            }
+
+            create_or_update_subscription(subscription_dict, subscription_table)
+            collected_subs.append(subscription_dict)
 
     if collected_subs is None:
         raise Exception("No Subscriptions found. Aborting...")
@@ -66,12 +65,13 @@ def create_or_update_subscription(subscription, subscription_table):
     try:
         response = subscription_table.update_item(
             Key= {'subscription_id': subscription["subscription_id"]},
-            UpdateExpression="set display_name=:name, subscription_state=:status, SubscriptionClass=:class_record, tenant_id=:tenant_id",
+            UpdateExpression="set display_name=:name, subscription_state=:status, SubscriptionClass=:class_record, tenant_id=:tenant_id, tenant_name=:tenant_name",
             ExpressionAttributeValues={
                 ':name':            subscription["display_name"],
                 ':status':          subscription["state"],
                 ':class_record':    subscription["SubscriptionClass"],
-                ':tenant_id':       subscription["tenant_id"]
+                ':tenant_id':       subscription["tenant_id"],
+                ':tenant_name':     subscription["tenant_name"]
             }
         )
 
